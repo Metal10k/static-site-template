@@ -6,47 +6,53 @@ var ts = require('gulp-typescript');
 var harp = require("harp");
 var zip = require('gulp-zip');
 
-gulp.task("jeh", function(){
-	console.log("Jeh jeh jeh jeh jeh jeh jeh jeh");
-});
-
-gulp.task('clean', function(){
+var cleanTask = function(){
   del(["bin/**/*"]);
-});
+};
+gulp.task('clean', cleanTask);
 
-gulp.task('build-ts', function () {
+var buildTsTask = function () {
   var tsResult = gulp.src('src/**/*.ts')
     .pipe(ts({
         noImplicitAny: true,
         out: 'output.js'
       }));
   return tsResult.js.pipe(gulp.dest('bin/js'));
-}); 
+};
+gulp.task('build-ts', buildTsTask); 
 
-gulp.task('build-less', function () {
+var buildLessTask = function () {
   return gulp.src('./less/**/*.less')
     .pipe(less({
       paths: [ path.join(__dirname, 'less', 'includes') ]
     }))
     .pipe(gulp.dest('./bin/css'));
-});
+};
+gulp.task('build-less', buildLessTask);
  
-gulp.task('build-harp', function(){
-  harp.compile("harp", "../bin", function(errors, output){
-    
+var buildViewsTask = function(){
+  harp.compile("views", "../bin/_views", function(errors, output){
+    console.log("views complete");
+    gulp.src(["bin/_views/**/*.*"])
+      .pipe(gulp.dest("bin"))
+      del(["bin/_views"]);
   });
-});
+};
+gulp.task('build-views', buildViewsTask);
 
 gulp.task("default", function(){
 	console.log("Nothing to see here");
 });
 
-gulp.task("build", ["clean", "build-ts", "build-less", "build-harp"], function(){
- 
+gulp.task("build", ["clean"], function(){
+  buildLessTask();
+  buildTsTask();
+  buildViewsTask();
 });
 
-gulp.task('zip', ["build"], function () {
+var zipTask = function () {
     return gulp.src('bin/**/*.*')
         .pipe(zip('release.zip'))
         .pipe(gulp.dest('dist'));
-});
+};
+gulp.task('zip', ["build"],zipTask);

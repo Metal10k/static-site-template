@@ -26,7 +26,7 @@ Node is not required for deployments, it is only used as a build tool.
 ```
 gulp build-ts
 gulp build-less
-gulp build-harp
+gulp build-views
 gulp build
 gulp clean
 gulp zip
