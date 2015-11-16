@@ -7,33 +7,32 @@ var fs = require('fs-extra');
 var rename = require("gulp-rename");
 
 function readFileIfExists(file) {
-    try
-    {
+    try {
         var contents = fs.readFileSync(file, { encoding: "utf8" });
         return contents;
     }
-    catch(e)
-    {
+    catch (e) {
         return '';
     }
 }
 
-function getOnlyName(filePathFull){
+function getOnlyName(filePathFull) {
 	var thing = filePathFull.split("/").reverse()[0];
 	console.log(thing);
 	return thing;
 }
 
-gulp.task("clean",function(){
+gulp.task("clean", function () {
 	return del(["bin"]);
 });
 
-gulp.task("build-views", function(){
-	var views = glob.sync("./views/pages/**/*.html");
-	
-	var pipes = views.map(function(view){
+gulp.task("build-views", function () {
+	var views = glob.sync("./views/pages/**/body.html");
+
+	var pipes = views.map(function (view) {
+
 		console.log(view);
-		var newFilePath = view.replace("./views/pages/", "");
+		var newFilePath = view.replace("./views/pages/", "").replace("/body.html", ".html");
 		console.log(newFilePath);
 		return gulp.src("views/template.html")
 			.pipe(rename(newFilePath))
@@ -42,11 +41,20 @@ gulp.task("build-views", function(){
 					{
 						match: 'body',
 						replacement: readFileIfExists(view)
-					}]
+					},
+					{
+						match: 'something',
+						replacement: readFileIfExists(view.replace("body.html", "something.html"))
+					},
+					{
+						match: 'somethingelse',
+						replacement: readFileIfExists(view.replace("body.html", "somethingelse.html"))
+					}
+				]
 			}))
 			.pipe(gulp.dest("./bin/views"));
 	});
-	
+
 	return merge(pipes);
 });
 
